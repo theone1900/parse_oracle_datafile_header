@@ -1,0 +1,211 @@
+
+KCVFH means kernel cache recovery file header.
+The length of datafile header for different version is different.
+
+9i kcvfh
+10g kcvfh   676 bytes
+11g kcvfh   860 bytes
+12c kcvfh  1112 bytes
+
+BBED> p kcvfh
+struct kcvfh, 860 bytes             @0
+   struct kcvfhbfh, 20 bytes        @0
+      ub1 type_kcbh                 @0        0x0b    --Block type
+      ub1 frmt_kcbh                 @1        0xa2    --Block format
+      ub1 spare1_kcbh               @2        0x00
+      ub1 spare2_kcbh               @3        0x00
+      ub4 rdba_kcbh                 @4        0x00400001       --Block address
+      ub4 bas_kcbh                  @8        0x00000000       --Scn base
+      ub2 wrp_kcbh                  @12       0x0000           --Scn wrap
+      ub1 seq_kcbh                  @14       0x01             --Sequence
+      ub1 flg_kcbh                  @15       0x04 (KCBHFCKV)  --Block flag
+      ub2 chkval_kcbh               @16       0x40d1           --Block checksum
+      ub2 spare3_kcbh               @18       0x0000
+   struct kcvfhhdr, 76 bytes        @20
+      ub4 kccfhswv                  @20       0x00000000      --Software version
+      ub4 kccfhcvn                  @24       0x0b200400      --Compatibility Version
+      ub4 kccfhdbi                  @28       0x028f3abc      --Dbid
+      text kccfhdbn[0]              @32      U                --Dbname
+      text kccfhdbn[1]              @33      P
+      text kccfhdbn[2]              @34      G
+      text kccfhdbn[3]              @35      R
+      text kccfhdbn[4]              @36
+      text kccfhdbn[5]              @37
+      text kccfhdbn[6]              @38
+      text kccfhdbn[7]              @39
+      ub4 kccfhcsq                  @40       0x000008da      --Controlfile Seq at last ckpt
+      ub4 kccfhfsz                  @44       0x00019a00      --Filesize
+      s_blkz kccfhbsz               @48       0x00            --The logical block size for flashback
+      ub2 kccfhfno                  @52       0x0001          --File number
+      ub2 kccfhtyp                  @54       0x0003          --File type
+      ub4 kccfhacid                 @56       0x00000000      --Activation identifier
+      ub4 kccfhcks                  @60       0x00000000      --File checksum
+      text kccfhtag[0]              @64                       --Control file tag based on date and time
+      text kccfhtag[1]              @65
+      text kccfhtag[2]              @66
+      text kccfhtag[3]              @67
+      text kccfhtag[4]              @68
+      text kccfhtag[5]              @69
+      text kccfhtag[6]              @70
+      text kccfhtag[7]              @71
+      text kccfhtag[8]              @72
+      text kccfhtag[9]              @73
+      text kccfhtag[10]             @74
+      text kccfhtag[11]             @75
+      text kccfhtag[12]             @76
+      text kccfhtag[13]             @77
+      text kccfhtag[14]             @78
+      text kccfhtag[15]             @79
+      text kccfhtag[16]             @80
+      text kccfhtag[17]             @81
+      text kccfhtag[18]             @82
+      text kccfhtag[19]             @83
+      text kccfhtag[20]             @84
+      text kccfhtag[21]             @85
+      text kccfhtag[22]             @86
+      text kccfhtag[23]             @87
+      text kccfhtag[24]             @88
+      text kccfhtag[25]             @89
+      text kccfhtag[26]             @90
+      text kccfhtag[27]             @91
+      text kccfhtag[28]             @92
+      text kccfhtag[29]             @93
+      text kccfhtag[30]             @94
+      text kccfhtag[31]             @95
+   ub4 kcvfhrdb                     @96       0x00400208   --Root dba block
+   struct kcvfhcrs, 8 bytes         @100
+      ub4 kscnbas                   @100      0x00000007   --File created scn
+      ub2 kscnwrp                   @104      0x0000
+   ub4 kcvfhcrt                     @108      0x3121c97d   --Datafile create time
+   ub4 kcvfhrlc                     @112      0x360233bd   --Last resetlog time
+   struct kcvfhrls, 8 bytes         @116                   --Last resetlog scn
+      ub4 kscnbas                   @116      0x000e2006
+      ub2 kscnwrp                   @120      0x0000
+   ub4 kcvfhbti                     @124      0x00000000   --Hot backup time(begin backup)
+   struct kcvfhbsc, 8 bytes         @128                   --Hot backup scn
+      ub4 kscnbas                   @128      0x00000000
+      ub2 kscnwrp                   @132      0x0000
+   ub2 kcvfhbth                     @136      0x0000       --Hot backup thread
+   ub2 kcvfhsta                     @138      0x2004 (KCVFHOFZ) --File status
+   struct kcvfhckp, 36 bytes        @484
+      struct kcvcpscn, 8 bytes      @484                   --Checkpoint scn
+         ub4 kscnbas                @484      0x2719a36e
+         ub2 kscnwrp                @488      0x0d87
+      ub4 kcvcptim                  @492      0x362e681b   --Checkpoint time
+      ub2 kcvcpthr                  @496      0x0001       --Checkpoint thread
+      union u, 12 bytes             @500
+         struct kcvcprba, 12 bytes  @500                   --Checkpoint rba
+            ub4 kcrbaseq            @500      0x00000014
+            ub4 kcrbabno            @504      0x00009af7
+            ub2 kcrbabof            @508      0x0010
+      ub1 kcvcpetb[0]               @512      0x02         --Backup Enabled Threads
+      ub1 kcvcpetb[1]               @513      0x00
+      ub1 kcvcpetb[2]               @514      0x00
+      ub1 kcvcpetb[3]               @515      0x00
+      ub1 kcvcpetb[4]               @516      0x00
+      ub1 kcvcpetb[5]               @517      0x00
+      ub1 kcvcpetb[6]               @518      0x00
+      ub1 kcvcpetb[7]               @519      0x00
+   ub4 kcvfhcpc                     @140      0x00000081   --Checkpoint count
+   ub4 kcvfhrts                     @144      0x36292c33   --Recovery timestamp
+   ub4 kcvfhccc                     @148      0x00000080   --Controlfile Checkpoint Count
+   struct kcvfhbcp, 36 bytes        @152
+      struct kcvcpscn, 8 bytes      @152                   --Backup ckpt scn
+         ub4 kscnbas                @152      0x00000000
+         ub2 kscnwrp                @156      0x0000
+      ub4 kcvcptim                  @160      0x00000000   --Backup ckpt time
+      ub2 kcvcpthr                  @164      0x0000       --Backup thread
+      union u, 12 bytes             @168                   --Backup rba
+         struct kcvcprba, 12 bytes  @168
+            ub4 kcrbaseq            @168      0x00000000
+            ub4 kcrbabno            @172      0x00000000
+            ub2 kcrbabof            @176      0x0000
+      ub1 kcvcpetb[0]               @180      0x00         --Ckpt enable thread bit
+      ub1 kcvcpetb[1]               @181      0x00
+      ub1 kcvcpetb[2]               @182      0x00
+      ub1 kcvcpetb[3]               @183      0x00
+      ub1 kcvcpetb[4]               @184      0x00
+      ub1 kcvcpetb[5]               @185      0x00
+      ub1 kcvcpetb[6]               @186      0x00
+      ub1 kcvcpetb[7]               @187      0x00
+   ub4 kcvfhbhz                     @312      0x00000000  --File size when hot backup begins
+   struct kcvfhxcd, 16 bytes        @316                  --External cache id
+      ub4 space_kcvmxcd[0]          @316      0x00000000
+      ub4 space_kcvmxcd[1]          @320      0x00000000
+      ub4 space_kcvmxcd[2]          @324      0x00000000
+      ub4 space_kcvmxcd[3]          @328      0x00000000
+   sword kcvfhtsn                   @332      0           --Tablespace number
+   ub2 kcvfhtln                     @336      0x0006      --The length of tablespace name
+   text kcvfhtnm[0]                 @338     S            --Tablespace name
+   text kcvfhtnm[1]                 @339     Y
+   text kcvfhtnm[2]                 @340     S
+   text kcvfhtnm[3]                 @341     T
+   text kcvfhtnm[4]                 @342     E
+   text kcvfhtnm[5]                 @343     M
+   text kcvfhtnm[6]                 @344
+   text kcvfhtnm[7]                 @345
+   text kcvfhtnm[8]                 @346
+   text kcvfhtnm[9]                 @347
+   text kcvfhtnm[10]                @348
+   text kcvfhtnm[11]                @349
+   text kcvfhtnm[12]                @350
+   text kcvfhtnm[13]                @351
+   text kcvfhtnm[14]                @352
+   text kcvfhtnm[15]                @353
+   text kcvfhtnm[16]                @354
+   text kcvfhtnm[17]                @355
+   text kcvfhtnm[18]                @356
+   text kcvfhtnm[19]                @357
+   text kcvfhtnm[20]                @358
+   text kcvfhtnm[21]                @359
+   text kcvfhtnm[22]                @360
+   text kcvfhtnm[23]                @361
+   text kcvfhtnm[24]                @362
+   text kcvfhtnm[25]                @363
+   text kcvfhtnm[26]                @364
+   text kcvfhtnm[27]                @365
+   text kcvfhtnm[28]                @366
+   text kcvfhtnm[29]                @367
+   ub4 kcvfhrfn                     @368      0x00000001  --Relateive file number
+   struct kcvfhrfs, 8 bytes         @372                  --Recovery Fuzzy SCN
+      ub4 kscnbas                   @372      0x00000000
+      ub2 kscnwrp                   @376      0x0000
+   ub4 kcvfhrft                     @380      0x00000000  --Recovery fuzzy time
+   struct kcvfhafs, 8 bytes         @384                  --Absolute Fuzzy SCN(Minimum PITR SCN)
+      ub4 kscnbas                   @384      0x00000000
+      ub2 kscnwrp                   @388      0x0000
+   ub4 kcvfhbbc                     @392      0x00000000  --Backup blocks count(except image copies)
+   ub4 kcvfhncb                     @396      0x00000000  --New media corrupt blocks
+   ub4 kcvfhmcb                     @400      0x00000000  --Media corrupt blocks
+   ub4 kcvfhlcb                     @404      0x00000000  --Logical corrupt blocks
+   ub4 kcvfhbcs                     @408      0x00000000  --
+   ub2 kcvfhofb                     @412      0x000a      --It should be the related with RDBA format
+   ub2 kcvfhnfb                     @414      0x000a      --It should be the related with RDBA format
+   ub4 kcvfhprc                     @416      0x3121c97a  --Previous Resetlog count
+   struct kcvfhprs, 8 bytes         @420                  --Previous Resetlog SCN from database
+      ub4 kscnbas                   @420      0x00000001
+      ub2 kscnwrp                   @424      0x0000
+   struct kcvfhprfs, 8 bytes        @428                  --Previous media recovery fuzzy scn
+      ub4 kscnbas                   @428      0x00000000
+      ub2 kscnwrp                   @432      0x0000
+   ub4 kcvfhtrt                     @444      0x00000000  --Terminal Recovery TimeStamp
+
+BBED>
+
+
+
+
+   1、修改数据的DBA,rdba_kcbh
+   2、修改文件的大小，kccfhfsz
+   3、修改文件号，kccfhfno
+   4、修改文件创建时SCN，kcvfhcrs
+   5、修改文件创建时间，kcvfhcrt
+   6、修改表空间号，kcvfhtsn
+   7、修改相对文件号，kcvfhrfn
+   8、修改表空间的名称， kcvfhtnm
+   9、修改表空间的长度，kcvfhtln
+   10、修改检查点的SCN，kcvfhckp
+   11、修改检查点的时间，kcvcptim
+   12、修改检查点的计数器，kcvfhcpc
+   13、修改检查点的控制文件备份的计数器， kcvfhccc
+   14、如果你修改是1号文件的1号块他的root rdba的地针是指向了bootstrap$
