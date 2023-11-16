@@ -1,0 +1,186 @@
+package main
+
+import (
+	"encoding/binary"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// KCBlockStruct represents the structure of the Oracle block
+//
+type KCBlockStruct struct {
+	TypeKCBH    byte
+	FrmtKCBH    byte
+	RDBAKCBH    uint32
+	ChkvalKCBH  uint16
+	KCCFHDBI    uint32
+	KCCFHDBNX   []byte
+	KCCFHCSQ    uint32
+	KCCFHFSZ    uint32
+	KCCFHFNO    uint16
+	KCVFHRFN    uint32
+	KCCFHTYP    uint16
+	KCVFHRDB    uint32
+	KSCNBAS     uint32
+	KSCNWRP     uint16
+	KCVFHCRT    uint32
+	KCVFHRLC    uint32
+	KCVFHRLS    struct {
+		KSCNBAS uint32
+		KSCNWRP uint16
+	}
+	KCVFHBSBSC  struct {
+		KSCNBAS uint32
+		KSCNWRP uint16
+	}
+	KCVFHSTA    uint16
+	KCVFHCPC    uint32
+	KCVFHCCC    uint32
+	KCVFHTSN    uint32
+	KCVFHTLN    uint16
+	KCVFHTNM    []byte   //KCVFHTNM    [30]byte
+	KCVFHPRC    uint32
+	KCVFHPRS    struct {
+		KSCNBAS uint32
+		KSCNWRP uint16
+	}
+	KCVCPSCN     struct {  //Checkpoint scn
+		KSCNBAS uint32
+		KSCNWRP uint16
+	}
+	KCVCPTime   uint32
+	KCVCPThr    uint16
+	KCVCPRA     struct {
+		KCRBASEQ uint32
+		KCRBABNO uint32
+		KCRBABOF uint32
+	}
+	// Add more fields based on your structure
+}
+
+func main() {
+	//// 检查是否提供了足够的参数
+	//if len(os.Args) < 2 {
+	//	fmt.Println("请提供文件路径作为参数")
+	//	return
+	//}
+	//
+	//// 获取文件路径参数
+	//filePath := os.Args[1]
+	fmt.Println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+	fmt.Println("##powered by ：黄林杰_Huanglinjie\n##version : 2023-v11\n##联系方式：17767151782\n##blog: https://blog.csdn.net/lixora/\n##info: Oracle 11g datafile block 1 header parse")
+	fmt.Println("##demo : parseOracleKcvfh.exe -dbfile c:\\lixora.dbf\n")
+	// 定义一个命令行标志
+	var dbFilePath string
+	flag.StringVar(&dbFilePath, "dbfile", "", "指定数据库文件路径")
+
+	// 解析命令行参数
+	flag.Parse()
+
+	// 检查是否提供了数据库文件路径
+	if dbFilePath == "" {
+		fmt.Println("[Info]: 请提供数据库文件路径--Pls provide path of Oracle datafile ")
+		os.Exit(1)
+	}
+
+
+	// Open the Oracle data file
+	// local dev test demo
+	//file, err := os.Open("C:\\Users\\ZMI\\Desktop\\asm-diskb\\system01_recovered.dbf")
+	file, err := os.Open(dbFilePath)
+
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	// Read the first block (assuming 8192 bytes)
+	blockSize := 8192
+	block := make([]byte, blockSize)
+	// 指定要读取的块号
+	blockNumber := 1
+
+	// 计算块的偏移量
+	blockOffset := blockSize * blockNumber
+
+	// 移动文件指针到块的起始位置
+	_, err = file.Seek(int64(blockOffset), io.SeekStart)
+	if err != nil {
+		fmt.Println("Error seeking to block:", err)
+		return
+	}
+
+
+
+	_, err = file.Read(block)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+
+	// 打印结果 -for debug hexdump 8kb block
+	//hexString := fmt.Sprintf("%X", block)
+	//fmt.Println("oracle 8kb  block Hexadecimal representation:", hexString)
+
+
+	// Parse the block using the defined structure
+	kcBlock := parseKCBlock(block)
+
+	// Print the extracted information
+	fmt.Println("========================================> BLOCK SUMMARY <========================================")
+	fmt.Printf("TypeKCBH: %#02x\n", kcBlock.TypeKCBH)
+	fmt.Printf("FrmtKCBH: %#x\n", kcBlock.FrmtKCBH)
+	fmt.Printf("RDBAKCBH: %#x\n", kcBlock.RDBAKCBH)
+	// Print more fields as needed
+	fmt.Printf("KCCFHDBI: %d\n", kcBlock.KCCFHDBI)
+	fmt.Printf("KCCFHDBNX: %s\n", strings.ReplaceAll(string(kcBlock.KCCFHDBNX), "\x00", ""))
+	fmt.Printf("KCVCPSCN_KSCNBAS: %#08x,ckp scn:%d\n", kcBlock.KSCNBAS,kcBlock.KSCNBAS)
+	fmt.Printf("KCVCPSCN_KSCNWRP: %#04x\n", kcBlock.KSCNWRP)
+
+	fmt.Printf("KCVFHSTA: %#x\n", kcBlock.KCVFHSTA)
+	fmt.Printf("KCVFHTNM: %s\n", strings.ReplaceAll(string(kcBlock.KCVFHTNM), "\x00", ""))
+	fmt.Printf("KCVFHTSN: %#d\n", kcBlock.KCVFHTSN)
+	fmt.Printf("KCVFHCRT: %#x,CREATION TIME:%s\n", kcBlock.KCVFHCRT,time.Unix(int64(kcBlock.KCVFHCRT), 0).Format("2006-01-02 15:04:05"))
+	fmt.Printf("KCVFHCCC: %#08x\n", kcBlock.KCVFHCCC)
+	fmt.Printf("KCVFHCPC: %#08x\n", kcBlock.KCVFHCPC)
+
+	// 将十六进制数转换为十进制
+	hexNumber := fmt.Sprintf("%X", kcBlock.KCCFHFSZ)
+	decimalNumber, err := strconv.ParseInt(hexNumber, 16, 64)
+	fmt.Printf("KCCFHFSZ: %#x, FILE SIZE(bytes):%d\n", kcBlock.KCCFHFSZ,decimalNumber*int64(blockSize))
+
+	fmt.Printf("KCCFHFNO: %d\n", kcBlock.KCCFHFNO)
+	fmt.Printf("KCVFHRFN: %d\n", kcBlock.KCVFHRFN)
+}
+
+func parseKCBlock(block []byte) KCBlockStruct {
+	kcBlock := KCBlockStruct{
+		TypeKCBH: block[0],
+		FrmtKCBH: block[1],
+		RDBAKCBH: binary.LittleEndian.Uint32(block[4:8]),
+		// Parse more fields based on your structure
+		KCCFHDBI: binary.LittleEndian.Uint32(block[28:32]),
+		KCCFHDBNX: block[32:40],
+		KSCNBAS: binary.LittleEndian.Uint32(block[484:488]),
+		KSCNWRP: binary.LittleEndian.Uint16(block[488:490]),
+		KCVFHCRT: binary.LittleEndian.Uint32(block[108:112]),
+		KCVFHSTA: binary.LittleEndian.Uint16(block[138:140]),
+		KCVFHTNM: block[338:368],
+		KCVFHCCC: binary.LittleEndian.Uint32(block[148:152]),
+		KCVFHCPC: binary.LittleEndian.Uint32(block[140:144]),
+		KCCFHFSZ: binary.LittleEndian.Uint32(block[44:48]),
+		KCCFHFNO: binary.LittleEndian.Uint16(block[52:54]),
+		KCVFHRFN: binary.LittleEndian.Uint32(block[368:372]),
+		KCVFHTSN: binary.LittleEndian.Uint32(block[332:336]),
+
+
+	}
+	return kcBlock
+}
