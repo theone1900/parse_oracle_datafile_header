@@ -3,17 +3,14 @@ PS C:\Users\ZMI\GolandProjects\parseOracleKcvfh> .\parseOracleKcvfh.exe -dbfile 
 
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 ##powered by ：黄林杰_Huanglinjie
-
 ##version : 2023-v11
-
 ##联系方式：17767151782
-
 ##blog: https://blog.csdn.net/lixora/
-
-##info: Oracle 11g datafile block 1 header parse
-
+##info: Oracle 11g datafile  header parse
 ##demo : parseOracleKcvfh.exe -dbfile c:\lixora.dbf
+##demo : parseOracleKcvfh.exe -dbfile C:\system01.dbf -modify -bas 123456 -wrp 000
 
 ========================================> BLOCK SUMMARY <========================================
 
