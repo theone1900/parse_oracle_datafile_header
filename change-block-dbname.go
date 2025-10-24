@@ -1,7 +1,7 @@
 //要修改 block[4:8] 位置的内容并将修改后的数据刷新到物理文件上，
 //你需要使用 os 包的 OpenFile 函数打开文件，
 //并使用 WriteAt 方法将修改后的数据写入指定的偏移位置。以下是一个示例：
-// oracle dbname 修改 ；改成SHITAN
+// oracle dbname 修改 ；改成lixora
 package main
 
 import (
