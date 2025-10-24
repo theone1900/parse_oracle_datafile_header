@@ -67,7 +67,7 @@ return
 //fmt.Printf("originalData2 : %#08x\n:",originalData)
 
 // 一个包含中文字符的字符串
-dbname := "SHITAN"
+dbname := "lixora"
 //fmt.Printf("dbname :%s\n",dbname)
 
 // 将字符串转换为字节切片(隐藏)
